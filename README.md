@@ -1,6 +1,6 @@
-# Nixagone — TechBrush Edition
+# TechBrushStore Django Ecommerce
 
-Nixagone is a modern, customizable e-commerce web application built with Django.
+TechBrushStore is a modern, customizable e-commerce web application built with Django.
 
 This repository is a **significantly modified and further developed version of the original Nixagone project**, with substantial modifications, improvements, redesigns, and additional functionality developed by **TechBrush**.
 
