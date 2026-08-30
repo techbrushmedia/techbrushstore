@@ -1,5 +1,7 @@
 from django.db import models
+from django.db import transaction
 from django.core.validators import MinValueValidator
+from uuid import uuid4
 from main.models import User
 from apps.product.models import Product, Size, Color
 
@@ -39,6 +41,7 @@ class Order(models.Model):
     address = models.ForeignKey(Address, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     shipped_at = models.DateTimeField(null=True, blank=True)
+    access_token = models.UUIDField(default=uuid4, editable=False, unique=True)
 
     def __str__(self):
         return self.order_number
@@ -86,40 +89,43 @@ class Order(models.Model):
     @classmethod
     def create_from_cart(cls, cart, address, shipping_cost=0):
         """Create order from cart"""
-        if not cart.items.exists():
-            return None
+        with transaction.atomic():
+            cart_items = list(cart.items.select_for_update().select_related('product'))
+            if not cart_items:
+                return None
 
-        # Calculate totals
-        subtotal = cart.get_total_price()
-        total_amount = subtotal + shipping_cost
+            products = Product.objects.select_for_update().in_bulk(
+                [cart_item.product_id for cart_item in cart_items]
+            )
+            for cart_item in cart_items:
+                if not products[cart_item.product_id].can_order(cart_item.quantity):
+                    return None
 
-        # Create order
-        order = cls.objects.create(
-            user=cart.user,
-            subtotal=subtotal,
-            shipping_cost=shipping_cost,
-            total_amount=total_amount,
-            address=address
-        )
+            subtotal = sum(
+                products[cart_item.product_id].price * cart_item.quantity
+                for cart_item in cart_items
+            )
+            total_amount = subtotal + shipping_cost
+            order = cls.objects.create(
+                user=cart.user,
+                subtotal=subtotal,
+                shipping_cost=shipping_cost,
+                total_amount=total_amount,
+                address=address
+            )
 
-        # Create order items and reduce stock
-        for cart_item in cart.items.all():
-            if cart_item.product.can_order(cart_item.quantity):
+            for cart_item in cart_items:
+                product = products[cart_item.product_id]
                 OrderItem.objects.create(
                     order=order,
-                    product=cart_item.product,
+                    product=product,
                     quantity=cart_item.quantity,
                     size=cart_item.size,
                     color=cart_item.color
                 )
-                cart_item.product.reduce_stock(cart_item.quantity)
-            else:
-                # If any item can't be ordered, delete the order
-                order.delete()
-                return None
+                product.reduce_stock(cart_item.quantity)
 
-        # Clear cart after successful order
-        cart.clear_cart()
+            cart.items.all().delete()
         return order
 
 

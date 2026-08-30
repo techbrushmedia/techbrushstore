@@ -241,11 +241,11 @@ def stock_status(product, show_stock_count=False):
 
 @register.filter
 def taka(value):
-    """Format value as taka"""
+    """Format value as US dollars."""
     try:
-        return f"{int(value)} ৳"
+        return f"${int(value):,}"
     except (ValueError, TypeError):
-        return f"0 ৳"
+        return "$0"
 
 
 @register.filter

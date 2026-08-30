@@ -59,7 +59,19 @@ class Product(models.Model):
 
     def get_primary_image_url(self):
         """Get primary product image URL"""
-        return self.images.filter(is_primary=True).first().image.url
+        if not self.pk:
+            return None
+        primary_image = self.get_primary_image()
+        if not primary_image:
+            return None
+        return primary_image.external_url or primary_image.image.url
+
+    def get_primary_image_fallback_url(self):
+        """Get the locally stored fallback URL for the primary image."""
+        if not self.pk:
+            return None
+        primary_image = self.get_primary_image()
+        return primary_image.image.url if primary_image else None
     
     def get_primary_image(self):
         """Get primary product image"""
@@ -110,6 +122,7 @@ class Color(models.Model):
 class Image(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/')
+    external_url = models.URLField(blank=True)
     alt_text = models.CharField(max_length=200, blank=True)
     is_primary = models.BooleanField(default=False)
 
@@ -119,6 +132,6 @@ class Image(models.Model):
     def save(self, *args, **kwargs):
         # Ensure only one primary image per product
         if self.is_primary:
-            Image.objects.filter(product=self.product, is_primary=True).update(is_primary=False)
+            Image.objects.filter(product=self.product, is_primary=True).exclude(pk=self.pk).update(is_primary=False)
         super().save(*args, **kwargs)
 

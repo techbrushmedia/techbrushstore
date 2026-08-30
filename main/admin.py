@@ -6,7 +6,7 @@ from django.contrib.admin import SimpleListFilter
 from apps.product.models import Product, Category, Size, Color, Image
 from apps.order.models import Order, OrderItem, Address
 from apps.cart.models import Cart, CartItem
-from .models import User, Config
+from .models import ContactMessage, User, Config
 
 
 # Custom Admin Site Configuration
@@ -71,7 +71,7 @@ class ColorInline(admin.TabularInline):
 class ImageInline(admin.TabularInline):
     model = Image
     extra = 1
-    fields = ('image_preview', 'image', 'alt_text', 'is_primary' )
+    fields = ('image_preview', 'image', 'external_url', 'alt_text', 'is_primary' )
     readonly_fields = ('image_preview',)
 
     def image_preview(self, obj):
@@ -238,7 +238,7 @@ class ColorAdmin(admin.ModelAdmin):
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('product', 'alt_text', 'is_primary', 'image_preview')
+    list_display = ('product', 'alt_text', 'external_url', 'is_primary', 'image_preview')
     list_filter = ('is_primary', 'product__category')
     search_fields = ('product__name', 'alt_text')
     readonly_fields = ('image_preview',)
@@ -416,4 +416,20 @@ class EcommerceAdminSite(admin.AdminSite):
         
         return super().index(request, extra_context)
     
-admin.site.register(Config)
+@admin.register(Config)
+class ConfigAdmin(admin.ModelAdmin):
+    list_display = ('site_title', 'email', 'phone', 'delivery_cost', 'delivery_cost_dhaka')
+    fields = (
+        'site_title', 'header_top', 'hero_image', 'email', 'phone', 'address',
+        'whatsapp_number', 'messanger_url', 'facebook_page_url', 'instagram_url', 'tiktok_url',
+        'delivery_cost', 'delivery_cost_dhaka', 'about_page',
+    )
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'name', 'email', 'inquiry_type', 'is_resolved', 'created_at')
+    list_filter = ('inquiry_type', 'is_resolved', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    list_editable = ('is_resolved',)
+    readonly_fields = ('created_at',)

@@ -2,17 +2,18 @@
 {% extends "layout.html" %}
 {% load nix %}
 
-{% block title %}Nixagone - Products{% endblock title %}
+{% block title %}{% config "site_title" %} - Products{% endblock title %}
 
 {% block main_content %}
 <div class="mx-auto">
     {% if search_query %}
         {% include "partials/heading.html" with title="Search" %}
-        <p class="mb-6 container mx-auto text-gray-600">Product maching "{{search_query}}"</p>
+        <p class="mb-6 container mx-auto text-gray-600">Results for "{{search_query}}"</p>
     {% else %}
-        {% include "partials/heading.html" with title="Products" %}
+        {% include "partials/heading.html" with title="Shop all products" %}
     {% endif %}
-    <form action="{% url 'products' %}" method="get" class="mb-6 md:mb-12 flex items-center gap-4 container mx-auto">
+        <form action="{% url 'products' %}" method="get" class="mb-6 md:mb-12 flex flex-wrap items-end gap-4 container mx-auto">
+            <div>
         <label for="select-category" class="text-gray-700 font-medium">Category:</label>
         <select name="category" id="select-category" class="border bg-white px-3 py-2" onchange="this.form.submit()">
             <option value="">All Categories</option>
@@ -20,11 +21,39 @@
                 <option value="{{ category.slug }}" {% if category.slug == current_category %}selected{% endif %}>{{ category.name }}</option>
             {% endfor %}
         </select>
+            </div>
+            <div>
+                <label for="min-price" class="block text-sm text-gray-700">Min price</label>
+                <input id="min-price" name="min_price" type="number" min="0" value="{{ min_price }}" class="w-28 border px-3 py-2">
+            </div>
+            <div>
+                <label for="max-price" class="block text-sm text-gray-700">Max price</label>
+                <input id="max-price" name="max_price" type="number" min="0" value="{{ max_price }}" class="w-28 border px-3 py-2">
+            </div>
+            <div>
+                <label for="sort" class="block text-sm text-gray-700">Sort by</label>
+                <select name="sort" id="sort" class="border bg-white px-3 py-2">
+                    <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name</option>
+                    <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: low to high</option>
+                    <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: high to low</option>
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+                </select>
+            </div>
+            <div>
+                <label for="per-page" class="block text-sm text-gray-700">Products per page</label>
+                <select name="per_page" id="per-page" class="border bg-white px-3 py-2">
+                    <option value="8" {% if per_page == 8 %}selected{% endif %}>8</option>
+                    <option value="12" {% if per_page == 12 %}selected{% endif %}>12</option>
+                    <option value="24" {% if per_page == 24 %}selected{% endif %}>24</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-black px-4 py-2 text-white hover:bg-gray-800">Apply</button>
         {% if search_query %}
             <input type="hidden" name="q" value="{{ search_query }}">
         {% endif %}
     </form>
     {% if products %}
+    <p class="mb-5 text-sm text-gray-600">{{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }} found</p>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {% for product in products %}
@@ -32,8 +61,9 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="flex items-center justify-center py-12 text-xl text-gray-800">
-        No Product Found
+    <div class="flex flex-col items-center justify-center py-12 text-center text-gray-800">
+        <p class="text-xl font-semibold">The collection is being prepared.</p>
+        <p class="mt-2 text-gray-600">Products added through the admin dashboard will appear here.</p>
     </div>
     {% endif %}
     <div class="mt-8">

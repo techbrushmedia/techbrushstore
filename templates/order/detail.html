@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% load nix %}
+
+{% block title %}Order {{ order.order_number }} - {% config "site_title" %}{% endblock title %}
+
+{% block main_content %}
+<section class="container mx-auto max-w-4xl py-8">
+  {% include "partials/heading.html" with title="Order details" %}
+  <div class="mt-6 flex flex-col gap-3 border p-5 md:flex-row md:items-center md:justify-between">
+    <div>
+      <p class="font-semibold">{{ order.order_number }}</p>
+      <p class="text-sm text-gray-500">Placed {{ order.created_at|date:"d M Y, H:i" }}</p>
+    </div>
+    <span class="capitalize font-semibold">{{ order.get_status_display }}</span>
+  </div>
+  <div class="mt-6 divide-y border">
+    {% for item in order_items %}
+      <div class="flex items-center justify-between gap-4 p-4">
+        <div>
+          <p class="font-semibold">{{ item.product.name }}</p>
+          <p class="text-sm text-gray-500">Quantity: {{ item.quantity }}{% if item.size %} | Size: {{ item.size }}{% endif %}{% if item.color %} | Color: {{ item.color }}{% endif %}</p>
+        </div>
+        <span class="font-semibold">{{ item.get_total_price|taka }}</span>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="mt-6 ml-auto max-w-sm border p-5">
+    <div class="flex justify-between py-2"><span>Subtotal</span><span>{{ order.subtotal|taka }}</span></div>
+    <div class="flex justify-between py-2"><span>Delivery</span><span>{{ order.shipping_cost|taka }}</span></div>
+    <div class="flex justify-between border-t pt-3 font-semibold"><span>Total</span><span>{{ order.total_amount|taka }}</span></div>
+  </div>
+  {% if order.can_cancel %}
+    <form action="{% url 'cancel_order' order.order_number %}" method="post" class="mt-6">
+      {% csrf_token %}
+      <button type="submit" class="border border-black px-4 py-2 hover:bg-black hover:text-white">Cancel order</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock main_content %}

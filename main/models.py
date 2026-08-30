@@ -26,27 +26,12 @@ class User(AbstractUser):
         return self.orders.all().order_by('-created_at')
     
 about = """
-<h2 class="font-bold text-left text-xl w-full">Our Mission:</h2>
-        <p class="py-3"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum placeat odit, est eum dolorem
-            esse totam iusto necessitatibus eligendi illo doloribus vero aperiam atque tempora repudiandae molestiae
-            nemo distinctio quisquam! </p>
-        <div class="gap-3 grid grid-cols-1 lg:grid-cols-3"> <img class="object-cover" src="/mission-family.e331843b.jpg"
-                alt="Family in living room"> <img class="object-cover" src="/mission-interior.6687104b.jpg"
-                alt="Interior"> <img class="object-cover" src="/mission-materials.de3dc493.jpg" alt="Materials"> </div>
-        <p class="py-3"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum placeat odit, est eum dolorem
-            esse totam iusto necessitatibus eligendi illo doloribus vero aperiam atque tempora repudiandae molestiae
-            nemo distinctio quisquam! </p>
-        <h2 class="font-bold mt-3 text-left text-xl w-full">Our Vision:</h2>
-        <p class="py-3"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum placeat odit, est eum dolorem
-            esse totam iusto necessitatibus eligendi illo doloribus vero aperiam atque tempora repudiandae molestiae
-            nemo distinctio quisquam! </p>
-        <h2 class="font-bold mt-3 text-left text-xl w-full">Our Values:</h2>
-        <p class="py-3"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum placeat odit, est eum dolorem
-            esse totam iusto necessitatibus eligendi illo doloribus vero aperiam atque tempora repudiandae molestiae
-            nemo distinctio quisquam! </p>
-        <div class="gap-3 grid grid-cols-1 lg:grid-cols-3"> <img class="object-cover" src="/mission-family.e331843b.jpg"
-                alt="Family in living room"> <img class="object-cover" src="/mission-interior.6687104b.jpg"
-                alt="Interior"> <img class="object-cover" src="/mission-materials.de3dc493.jpg" alt="Materials"> </div>
+<h2 class="font-bold text-left text-xl w-full">About TechBrushStore</h2>
+<p class="py-3">TechBrushStore is an online store built around a clear collection, simple ordering, and thoughtful service.</p>
+<h2 class="font-bold mt-3 text-left text-xl w-full">Our approach</h2>
+<p class="py-3">We focus on detailed product information, transparent pricing, and a smooth shopping experience across every device.</p>
+<h2 class="font-bold mt-3 text-left text-xl w-full">Here when you need us</h2>
+<p class="py-3">For questions about a product or an order, you can reach the store through the contact details on the Contact page.</p>
 """
 
 class Config(models.Model):
@@ -67,9 +52,36 @@ class Config(models.Model):
     whatsapp_number = models.CharField(max_length=20, null=True, blank=True)
     messanger_url = models.URLField(null=True, blank=True)
     facebook_page_url = models.URLField( null=True, blank=True)
+    instagram_url = models.URLField(null=True, blank=True)
     tiktok_url = models.URLField( null=True, blank=True)
 
     delivery_cost = models.IntegerField(default=0)
     delivery_cost_dhaka = models.IntegerField(default=0)
 
     about_page = models.TextField(null=True, blank=True, default=about)
+    hero_image = models.ImageField(upload_to='site/', null=True, blank=True)
+
+
+class ContactMessage(models.Model):
+    INQUIRY_TYPES = [
+        ('general', 'General Inquiry'),
+        ('order', 'Order Related'),
+        ('product', 'Product Question'),
+        ('shipping', 'Shipping & Delivery'),
+        ('return', 'Returns & Refunds'),
+        ('technical', 'Technical Support'),
+    ]
+
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    inquiry_type = models.CharField(max_length=20, choices=INQUIRY_TYPES)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_resolved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.subject} - {self.email}'

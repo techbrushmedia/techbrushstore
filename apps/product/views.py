@@ -10,6 +10,13 @@ class ProductListView(ListView):
     context_object_name = 'products'
     paginate_by = 12
 
+    def get_paginate_by(self, queryset):
+        try:
+            per_page = int(self.request.GET.get('per_page', self.paginate_by))
+        except (TypeError, ValueError):
+            return self.paginate_by
+        return per_page if per_page in (8, 12, 24) else self.paginate_by
+
     def get_queryset(self):
         queryset = Product.objects.filter(is_active=True).select_related('category')
         
@@ -55,6 +62,9 @@ class ProductListView(ListView):
         context['current_category'] = self.request.GET.get('category', '')
         context['search_query'] = self.request.GET.get('q', '')
         context['current_sort'] = self.request.GET.get('sort', 'name')
+        context['min_price'] = self.request.GET.get('min_price', '')
+        context['max_price'] = self.request.GET.get('max_price', '')
+        context['per_page'] = self.get_paginate_by(self.object_list)
         return context
 
 
@@ -85,7 +95,7 @@ class ProductDetailView(DetailView):
 class CategoryDetailView(DetailView):
     """Category detail view with products"""
     model = Category
-    template_name = 'store/category_detail.html'
+    template_name = 'product/category_detail.html'
     context_object_name = 'category'
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
@@ -94,11 +104,19 @@ class CategoryDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         category = self.get_object()
         
-        # Get products in this category with pagination
         products = Product.objects.filter(
             category=category,
             is_active=True
-        ).order_by('name')
+        )
+        sort_by = self.request.GET.get('sort', 'name')
+        if sort_by == 'price_low':
+            products = products.order_by('price')
+        elif sort_by == 'price_high':
+            products = products.order_by('-price')
+        elif sort_by == 'newest':
+            products = products.order_by('-created_at')
+        else:
+            products = products.order_by('name')
         
         paginator = Paginator(products, 12)
         page_number = self.request.GET.get('page')
@@ -106,4 +124,5 @@ class CategoryDetailView(DetailView):
         
         context['products'] = page_obj
         context['product_count'] = products.count()
+        context['current_sort'] = sort_by
         return context

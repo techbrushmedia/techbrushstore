@@ -30,11 +30,16 @@ SECRET_KEY = getenv('SECRET_KEY')
 
 DEBUG = getenv('DEBUG')
 
-ALLOWED_HOSTS = [ '127.0.0.1', '0.0.0.0', 'nixagone.pythonanywhere.com']
+ALLOWED_HOSTS = [ '127.0.0.1', '0.0.0.0']
 
-CSRF_TRUSTED_ORIGINS = ['https://nixagone.pythonanywhere.com', 'http://127.0.0.1:8000', 'http://0.0.0.0:8000',]
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://0.0.0.0:8000',]
 
 AUTH_USER_MODEL = 'main.User'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
+EMAIL_BACKEND = getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = getenv('DEFAULT_FROM_EMAIL', 'no-reply@techbrushstore.local')
 
 
 

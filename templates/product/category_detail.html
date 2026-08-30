@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% load nix %}
+
+{% block title %}{{ category.name }} - {% config "site_title" %}{% endblock title %}
+
+{% block main_content %}
+<section class="mx-auto py-4">
+  {% include "partials/heading.html" with title=category.name %}
+  <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <p class="text-gray-600">{{ product_count }} product{{ product_count|pluralize }} in this collection.</p>
+    <form method="get" class="flex items-center gap-2">
+      <label for="sort" class="text-sm text-gray-700">Sort by</label>
+      <select id="sort" name="sort" class="border bg-white px-3 py-2" onchange="this.form.submit()">
+        <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name</option>
+        <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: low to high</option>
+        <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: high to low</option>
+        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+      </select>
+    </form>
+  </div>
+  {% if products %}
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {% for product in products %}
+        {% product_card product %}
+      {% endfor %}
+    </div>
+    <div class="mt-8">{% include "partials/pagination.html" %}</div>
+  {% else %}
+    <div class="py-12 text-center">
+      <p class="text-xl font-semibold">This collection is being prepared.</p>
+      <a href="{% url 'products' %}" class="mt-5 inline-block bg-black px-5 py-3 text-white hover:bg-gray-800">Browse all products</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock main_content %}

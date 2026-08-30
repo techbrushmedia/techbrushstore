@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% load nix %}
+
+{% block title %}{{ title }} - {% config "site_title" %}{% endblock title %}
+
+{% block main_content %}
+<section class="mx-auto max-w-3xl py-12">
+  {% include "partials/heading.html" with title=title %}
+  <div class="mt-8 space-y-8 leading-7 text-gray-700">
+    {% for heading, text in sections %}
+      <div>
+        <h2 class="text-lg font-semibold text-black">{{ heading }}</h2>
+        <p class="mt-2">{{ text }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock main_content %}

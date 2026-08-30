@@ -1,6 +1,9 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 from .models import Order, Address
 from main.models import Config
 from apps.cart.views import get_or_create_cart
@@ -50,6 +53,8 @@ def checkout_view(request):
         order = Order.create_from_cart(cart, address, shipping_cost)
         
         if order:
+            if not order.user_id:
+                request.session[f'order_access_{order.order_number}'] = str(order.access_token)
             messages.success(request, f'Order {order.order_number} placed successfully!')
             return redirect('confirmation', order_number=order.order_number) 
         else:
@@ -66,12 +71,18 @@ def checkout_view(request):
 
 def confirmation(request, order_number):
     order = get_object_or_404(Order, order_number=order_number)
+    if order.user_id:
+        if not request.user.is_authenticated or request.user != order.user:
+            raise Http404
+    elif request.session.get(f'order_access_{order.order_number}') != str(order.access_token):
+        raise Http404
     return render(request, 'order/confirmation.html', {'order': order})
 
 # ============================================================================
 # ORDER VIEWS
 # ============================================================================
 
+@login_required
 def order_list(request):
     """List user's orders"""
     orders = request.user.get_orders()
@@ -86,6 +97,7 @@ def order_list(request):
     return render(request, 'order/history.html', context)
 
 
+@login_required
 def order_detail(request, order_number):
     """Order detail view"""
     order = get_object_or_404(
@@ -100,8 +112,10 @@ def order_detail(request, order_number):
         'order': order,
         'order_items': order_items,
     }
-    return render(request, 'store/order_detail.html', context)
+    return render(request, 'order/detail.html', context)
 
+@login_required
+@require_POST
 def cancel_order(request, order_number):
     """Cancel an order"""
     order = get_object_or_404(

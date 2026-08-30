@@ -1,23 +1,35 @@
-{% extends "layout.html" %} {% block title %}Nixagone{% endblock title %} 
-{% block main_content %}
+{% extends "layout.html" %}
 {% load nix %}
+{% block title %}{% config "site_title" %}{% endblock title %}
+{% block main_content %}
+{% config 'hero_image' as hero_image %}
 
-<section class="relative">
-  <div class="container mx-auto px-4 py-28 flex flex-col items-center justify-center">
-    <h1 class="text-4xl text-black font-bold text-center mb-5">Wear your profession</h1>
-    <p class="text-gray-700 text-center text-lg mb-8">Show your profession with our premium quality T-Shirts.</p>
-    <a href="{% url "products" %}" class="bg-black text-white hover:bg-white hover:text-black active:border-transparent active:bg-black active:text-white py-3 px-5 border-2 border-black transition">Shop Now</a>
-  </div>
-  <div class="bg relative text-gray-100 max-w-[1200px] -mt-20 mx-auto">
-    {% include "partials/hero_bg.html" %}
+<section class="relative left-1/2 h-[calc(100vw*0.5)] max-h-[720px] w-screen -translate-x-1/2 overflow-hidden bg-gray-950">
+  {% if hero_image %}
+  <img src="{{ hero_image.url }}" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+  {% else %}
+  <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=2000&q=85" alt="" class="absolute inset-0 z-0 h-full w-full object-cover">
+  {% endif %}
+  <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/25 via-black/40 to-black/85"></div>
+  <div class="relative z-20 mx-auto flex h-full max-w-7xl items-center px-6 py-8 md:px-10 md:py-16">
+    <div class="max-w-2xl text-left">
+      <h1 class="text-4xl font-bold leading-tight text-white md:text-6xl">Made for everyday expression</h1>
+      <p class="mt-6 max-w-xl text-lg leading-8 text-white/90">Explore the TechBrushStore collection and find pieces that fit your style.</p>
+      <a href="{% url "products" %}" class="mt-8 inline-flex bg-[#E40078] px-5 py-3 font-semibold text-white transition-colors hover:bg-[#BE0065]">Explore the collection</a>
+    </div>
   </div>
 </section>
 
-<section class="container mb-16">
-  {% include "partials/heading.html" with title='Featured Products' %}
-  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+<section class="container mt-16 mb-16">
+  {% include "partials/heading.html" with title='Featured picks' %}
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
     {% for product in featured_products %}
       {% product_card product %}
+    {% empty %}
+      <div class="col-span-full py-10 text-center">
+        <p class="text-lg font-semibold">Featured products are coming soon.</p>
+        <p class="mt-2 text-gray-600">Mark products as featured in the admin dashboard to show them here.</p>
+      </div>
     {% endfor %}
   </div>
 </section>
@@ -44,9 +56,9 @@
       </svg>
     </div>
     <div class="flex flex-col justify-center ml-6">
-      <h3 class="font-bold lg:text-sm text-left text-xs">Free Delivery</h3>
+      <h3 class="font-bold lg:text-sm text-left text-xs">Clear delivery rates</h3>
       <p class="lg:text-left lg:text-sm text-center text-light text-xs">
-        Orders from {{1250|taka}}
+        Calculated at checkout
       </p>
     </div>
   </div>
@@ -69,8 +81,8 @@
       </svg>
     </div>
     <div class="flex flex-col justify-center ml-6">
-      <h3 class="font-bold lg:text-sm text-left text-xs">Money returns</h3>
-      <p class="lg:text-sm text-left text-light text-xs">30 Days guarantee</p>
+      <h3 class="font-bold lg:text-sm text-left text-xs">Easy ordering</h3>
+      <p class="lg:text-sm text-left text-light text-xs">Cash on delivery available</p>
     </div>
   </div>
   <div
@@ -92,8 +104,8 @@
       </svg>
     </div>
     <div class="flex flex-col justify-center ml-6">
-      <h3 class="font-bold lg:text-sm text-left text-xs">24/7 Supports</h3>
-      <p class="lg:text-sm text-left text-light text-xs">Consumer support</p>
+      <h3 class="font-bold lg:text-sm text-left text-xs">Need help?</h3>
+      <p class="lg:text-sm text-left text-light text-xs">Contact the store anytime</p>
     </div>
   </div>
 </section>

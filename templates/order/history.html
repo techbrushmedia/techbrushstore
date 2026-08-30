@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% load nix %}
+
+{% block title %}My Orders - {% config "site_title" %}{% endblock title %}
+
+{% block main_content %}
+<section class="container mx-auto max-w-5xl py-8">
+  {% include "partials/heading.html" with title="My Orders" %}
+  {% if orders %}
+    <div class="mt-6 divide-y border">
+      {% for order in orders %}
+        <a href="{% url 'order_detail' order.order_number %}" class="flex flex-col gap-2 p-4 hover:bg-gray-50 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p class="font-semibold">{{ order.order_number }}</p>
+            <p class="text-sm text-gray-500">{{ order.created_at|date:"d M Y, H:i" }}</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="capitalize text-sm">{{ order.get_status_display }}</span>
+            <span class="font-semibold">{{ order.total_amount|taka }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+    <div class="mt-8">{% include "partials/pagination.html" %}</div>
+  {% else %}
+    <div class="py-16 text-center">
+      <p class="text-lg font-semibold">You have not placed an order yet.</p>
+      <a href="{% url 'products' %}" class="mt-5 inline-block bg-black px-5 py-3 text-white hover:bg-gray-800">Browse products</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock main_content %}

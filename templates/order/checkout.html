@@ -1,6 +1,6 @@
 {% extends "layout.html" %} 
 {% load nix %} 
-{% block title %}Checkout - Nixagone{% endblock title %} 
+{% block title %}Checkout - {% config "site_title" %}{% endblock title %}
 {% block main_content %}
   {% include "partials/heading.html" with title="Checkout" %}
 <form action="{% url "checkout" %}" method="post"
@@ -10,10 +10,10 @@ x-data="{
     updateDeliveryCost(event) {
         const district = event.target.value;
         if (district === 'Dhaka') {
-            this.deliveryCost = '{% config 'delivery_cost_dhaka' %} ৳';
+            this.deliveryCost = '${% config 'delivery_cost_dhaka' %}';
             this.totalCost = {{subtotal}} + {% config 'delivery_cost_dhaka' %};
         } else if (district) {
-            this.deliveryCost = '{% config 'delivery_cost' %} ৳';
+            this.deliveryCost = '${% config 'delivery_cost' %}';
             this.totalCost = {{subtotal}} + {% config 'delivery_cost' %};
         } else {
             this.deliveryCost = 'select a district';
@@ -118,7 +118,7 @@ x-data="{
         </div>
         <div class="flex justify-between py-5">
           <p>Total</p>
-          <div class="font-semibold text-lg" ><span x-text="totalCost"></span><span> ৳</span></div>
+          <div class="font-semibold text-lg" ><span>$</span><span x-text="totalCost"></span></div>
         </div>
       </div>
       <div class="border px-4 py-5 mb-6 shadow-md">
