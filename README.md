@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="static/img/logo.png" alt="TechBrush Store" width="220">
-</p>
+
 
 <h1 align="center">TechBrush Store</h1>
 
